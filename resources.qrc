@@ -1,0 +1,42 @@
+<RCC>
+    <qresource prefix="/">
+        <file>style.qss</file>
+    </qresource>
+    <qresource prefix="/themes">
+        <file alias="Light.qss">themes/Light.qss</file>
+        <file alias="Dark.qss">themes/Dark.qss</file>
+        <file alias="ClassicLight.qss">themes/ClassicLight.qss</file>
+    </qresource>
+    <qresource prefix="/gamerpics">
+        <file>gamerpics/413607e1-2041c.png</file>
+        <file>gamerpics/41560855-20429.png</file>
+        <file>gamerpics/424607d1-28026.png</file>
+        <file>gamerpics/444d07d1-2808e.png</file>
+        <file>gamerpics/465607d3-2802e.png</file>
+        <file>gamerpics/494d8835-20005.png</file>
+        <file>gamerpics/494d8867-20003.png</file>
+        <file>gamerpics/4d4207d1-20375.png</file>
+        <file>gamerpics/4d530822-20002.png</file>
+        <file>gamerpics/4d53084c-28000.png</file>
+        <file>gamerpics/544607d7-28017.png</file>
+        <file>gamerpics/565507e2-28000.png</file>
+        <file>gamerpics/584507d1-20400.png</file>
+        <file>gamerpics/5857094b-20408.png</file>
+        <file>gamerpics/fffe07d1-20000.png</file>
+        <file>gamerpics/fffe07d1-20001.png</file>
+        <file>gamerpics/fffe07d1-20002.png</file>
+        <file>gamerpics/fffe07d1-20003.png</file>
+        <file>gamerpics/fffe07d1-20004.png</file>
+        <file>gamerpics/fffe07d1-20006.png</file>
+        <file>gamerpics/fffe07d1-20007.png</file>
+        <file>gamerpics/fffe07d1-20008.png</file>
+        <file>gamerpics/fffe07d1-20009.png</file>
+        <file>gamerpics/fffe07d1-2000a.png</file>
+        <file>gamerpics/fffe07d1-2000c.png</file>
+        <file>gamerpics/fffe07d1-21015.png</file>
+        <file>gamerpics/fffe07d1-21016.png</file>
+        <file>gamerpics/fffe07d1-21019.png</file>
+        <file>gamerpics/fffe07d1-21020.png</file>
+        <file>gamerpics/fffe07d1-21029.png</file>
+    </qresource>
+</RCC>

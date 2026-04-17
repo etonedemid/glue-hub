@@ -1,0 +1,405 @@
+/* ── ReXGlue Hub Xbox 360 Dashboard Theme (Light) ── */
+
+QMainWindow {
+    background: qradialgradient(cx:0.5, cy:0.15, radius:1.25,
+                               stop:0 #ffffff,
+                               stop:0.45 #eef3f8,
+                               stop:1 #d7e0ea);
+}
+
+/* ── Sidebar ── */
+#sidebar {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba(255, 255, 255, 245),
+                                stop:0.55 rgba(244, 248, 252, 245),
+                                stop:1 rgba(227, 235, 244, 245));
+    border-right: 1px solid rgba(0, 0, 0, 25);
+}
+
+#sidebarTitle {
+    color: #5aa700;
+    font-size: 22px;
+    font-weight: bold;
+    padding: 20px 16px 4px 16px;
+}
+
+#sidebarSubtitle {
+    color: rgba(0, 0, 0, 130);
+    font-size: 11px;
+    padding: 0px 16px 16px 16px;
+}
+
+/* Profile section */
+#profileSection {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba(255, 255, 255, 200),
+                                stop:1 rgba(0, 0, 0, 6));
+    border-top: 1px solid rgba(0, 0, 0, 18);
+}
+
+#profileTag {
+    color: rgba(0, 0, 0, 200);
+    font-size: 12px;
+    font-weight: bold;
+    padding: 2px 8px;
+}
+
+#profileScore {
+    color: #5aa700;
+    font-size: 11px;
+    padding: 0px 8px;
+}
+
+#profilePicLabel {
+    border-radius: 20px;
+}
+
+#profileEditBtn {
+    background: rgba(255, 255, 255, 120);
+    color: rgba(0, 0, 0, 170);
+    border: 1px solid rgba(0, 0, 0, 22);
+    border-radius: 6px;
+    font-weight: bold;
+}
+
+#profileEditBtn:hover {
+    background: rgba(90, 167, 0, 18);
+    border-color: rgba(90, 167, 0, 110);
+}
+
+/* ── Buttons ── */
+#refreshBtn {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba(255, 255, 255, 220),
+                                stop:1 rgba(0, 0, 0, 8));
+    color: rgba(0, 0, 0, 175);
+    border: 1px solid rgba(0, 0, 0, 22);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: bold;
+    margin: 8px 16px;
+}
+
+#refreshBtn:hover {
+    border-color: rgba(90, 167, 0, 110);
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba(90, 167, 0, 12),
+                                stop:1 rgba(0, 0, 0, 8));
+}
+
+#refreshBtn:pressed {
+    background: rgba(0, 0, 0, 12);
+}
+
+#setupBtn {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba(255, 255, 255, 235),
+                                stop:1 rgba(0, 0, 0, 10));
+    color: rgba(0, 0, 0, 185);
+    border: 1px solid rgba(0, 0, 0, 24);
+    border-radius: 10px;
+    padding: 12px 32px;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+#setupBtn:hover {
+    border-color: rgba(90, 167, 0, 110);
+}
+
+#setupBtn:pressed {
+    background: rgba(0, 0, 0, 12);
+}
+
+#setupBtn:disabled {
+    background: rgba(255, 255, 255, 140);
+    color: rgba(0, 0, 0, 90);
+    border-color: rgba(0, 0, 0, 12);
+}
+
+#launchBtn {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #8fd400,
+                                stop:0.5 #63b600,
+                                stop:1 #3f9300);
+    color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 30);
+    border-radius: 10px;
+    padding: 12px 32px;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+#launchBtn:hover {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #a3ea10,
+                                stop:1 #4aa400);
+}
+
+#launchBtn:pressed {
+    background: #4aa400;
+}
+
+#wineBtn {
+    background: rgba(255, 255, 255, 200);
+    color: rgba(0, 0, 0, 180);
+    border: 1px solid rgba(0, 0, 0, 22);
+    border-radius: 10px;
+    padding: 12px 32px;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+#wineBtn:hover {
+    border-color: rgba(90, 167, 0, 110);
+    background: rgba(90, 167, 0, 10);
+}
+
+/* ── Game List in Sidebar ── */
+#gameList {
+    background: transparent;
+    border: none;
+    outline: none;
+    padding: 4px 8px;
+}
+
+#gameList::item {
+    background: transparent;
+    color: rgba(0, 0, 0, 165);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin: 2px 0px;
+    font-size: 13px;
+}
+
+#gameList::item:hover {
+    background: rgba(0, 0, 0, 6);
+}
+
+#gameList::item:selected {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                                stop:0 rgba(143, 212, 0, 230),
+                                stop:1 rgba(63, 147, 0, 230));
+    color: #ffffff;
+    font-weight: bold;
+    border: 1px solid rgba(0, 0, 0, 18);
+}
+
+/* ── Detail Panel ── */
+#detailPanel {
+    background: transparent;
+}
+
+#bannerLabel {
+    background: rgba(0, 0, 0, 6);
+    border: 1px solid rgba(0, 0, 0, 12);
+    border-radius: 14px;
+}
+
+#gameTitle {
+    color: rgba(0, 0, 0, 215);
+    font-size: 30px;
+    font-weight: bold;
+}
+
+#gameDescription {
+    color: rgba(0, 0, 0, 140);
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+#platformTag {
+    background: rgba(255, 255, 255, 170);
+    color: rgba(0, 0, 0, 150);
+    border: 1px solid rgba(0, 0, 0, 14);
+    border-radius: 12px;
+    padding: 4px 14px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+#platformTagCurrent {
+    background: rgba(90, 167, 0, 14);
+    color: #5aa700;
+    border: 1px solid rgba(90, 167, 0, 110);
+    border-radius: 12px;
+    padding: 4px 14px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* ── Status Bar ── */
+#statusLabel {
+    color: rgba(0, 0, 0, 120);
+    font-size: 12px;
+    padding: 4px 16px;
+}
+
+/* ── Setup Dialog ── */
+QDialog {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #ffffff,
+                                stop:1 #e6edf4);
+}
+
+QDialog QLabel {
+    color: rgba(0, 0, 0, 175);
+    font-size: 13px;
+}
+
+#setupHeader {
+    font-size: 20px;
+    font-weight: bold;
+    color: rgba(0, 0, 0, 220);
+}
+
+#setupPlatformLabel {
+    color: #5aa700;
+    font-size: 13px;
+}
+
+#setupOrLabel {
+    color: rgba(0, 0, 0, 120);
+    font-size: 12px;
+    margin: 4px 0;
+}
+
+QDialog QGroupBox#setupGroupBox {
+    color: rgba(0, 0, 0, 175);
+    font-weight: bold;
+    border: 1px solid rgba(0, 0, 0, 16);
+    border-radius: 10px;
+    margin-top: 12px;
+    padding-top: 20px;
+}
+
+QDialog QGroupBox#setupGroupBox::title {
+    subcontrol-origin: margin;
+    left: 12px;
+    padding: 0 4px;
+}
+
+QDialog QLineEdit {
+    background: rgba(255, 255, 255, 210);
+    color: rgba(0, 0, 0, 180);
+    border: 1px solid rgba(0, 0, 0, 16);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
+}
+
+QDialog QLineEdit:focus {
+    border-color: rgba(90, 167, 0, 110);
+}
+
+QDialog QPushButton {
+    background: rgba(255, 255, 255, 190);
+    color: rgba(0, 0, 0, 170);
+    border: 1px solid rgba(0, 0, 0, 16);
+    border-radius: 8px;
+    padding: 8px 20px;
+    font-size: 13px;
+}
+
+QDialog QPushButton:hover {
+    border-color: rgba(90, 167, 0, 110);
+}
+
+QDialog #dialogSetupBtn {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #8fd400,
+                                stop:1 #3f9300);
+    color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 24);
+    font-weight: bold;
+}
+
+QDialog #dialogSetupBtn:hover {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #a3ea10,
+                                stop:1 #4aa400);
+}
+
+QProgressBar {
+    background: rgba(0, 0, 0, 6);
+    border: 1px solid rgba(0, 0, 0, 14);
+    border-radius: 8px;
+    text-align: center;
+    color: rgba(0, 0, 0, 170);
+    font-size: 12px;
+    min-height: 22px;
+}
+
+QProgressBar::chunk {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                                stop:0 #8fd400,
+                                stop:1 #3f9300);
+    border-radius: 7px;
+}
+
+/* ── Scroll area ── */
+QScrollArea {
+    border: none;
+    background: transparent;
+}
+
+QScrollBar:vertical {
+    background: rgba(0, 0, 0, 5);
+    width: 8px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:vertical {
+    background: rgba(0, 0, 0, 18);
+    border-radius: 4px;
+    min-height: 30px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: rgba(90, 167, 0, 18);
+}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+/* ── Empty state ── */
+#emptyLabel {
+    color: rgba(0, 0, 0, 120);
+    font-size: 16px;
+}
+
+/* ── Theme Picker ── */
+QComboBox {
+    background: rgba(255, 255, 255, 190);
+    color: rgba(0, 0, 0, 170);
+    border: 1px solid rgba(0, 0, 0, 16);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+QComboBox:hover {
+    border-color: rgba(90, 167, 0, 110);
+}
+
+QComboBox::drop-down {
+    border: none;
+    padding-right: 8px;
+}
+
+QComboBox QAbstractItemView {
+    background: #ffffff;
+    color: rgba(0, 0, 0, 180);
+    border: 1px solid rgba(0, 0, 0, 16);
+    selection-background-color: rgba(143, 212, 0, 230);
+    selection-color: #ffffff;
+}
+
+/* ── Wine Warning ── */
+#wineWarningLabel {
+    color: rgba(0, 0, 0, 140);
+    font-size: 12px;
+    padding: 4px;
+}

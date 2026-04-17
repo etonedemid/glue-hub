@@ -1,0 +1,384 @@
+/* ── ReXGlue Hub Stylesheet ── */
+
+QMainWindow {
+    background-color: #1a1a2e;
+}
+
+/* ── Sidebar ── */
+#sidebar {
+    background-color: #16213e;
+    border-right: 1px solid #0f3460;
+}
+
+#sidebarTitle {
+    color: #e94560;
+    font-size: 22px;
+    font-weight: bold;
+    padding: 20px 16px 4px 16px;
+}
+
+#sidebarSubtitle {
+    color: #8899aa;
+    font-size: 11px;
+    padding: 0px 16px 16px 16px;
+}
+
+#refreshBtn {
+    background-color: #0f3460;
+    color: #e0e0e0;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: bold;
+    margin: 8px 16px;
+}
+
+#refreshBtn:hover {
+    background-color: #1a4a7a;
+}
+
+#refreshBtn:pressed {
+    background-color: #0a2540;
+}
+
+/* ── Game List in Sidebar ── */
+#gameList {
+    background: transparent;
+    border: none;
+    outline: none;
+    padding: 4px 8px;
+}
+
+#gameList::item {
+    background: transparent;
+    color: #c0c8d4;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin: 2px 0px;
+    font-size: 13px;
+}
+
+#gameList::item:hover {
+    background-color: #1a3a5c;
+}
+
+#gameList::item:selected {
+    background-color: #0f3460;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+/* ── Detail Panel ── */
+#detailPanel {
+    background-color: #1a1a2e;
+}
+
+#bannerLabel {
+    background-color: #0d0d1a;
+    border-radius: 12px;
+}
+
+#gameTitle {
+    color: #ffffff;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+#gameDescription {
+    color: #a0a8b8;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+#platformTag {
+    background-color: #0f3460;
+    color: #4fc3f7;
+    border-radius: 12px;
+    padding: 4px 14px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+#platformTagCurrent {
+    background-color: #1b5e20;
+    color: #66bb6a;
+    border-radius: 12px;
+    padding: 4px 14px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+#setupBtn {
+    background-color: #e94560;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 32px;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+#setupBtn:hover {
+    background-color: #ff6b81;
+}
+
+#setupBtn:pressed {
+    background-color: #c0392b;
+}
+
+#setupBtn:disabled {
+    background-color: #444466;
+    color: #777799;
+}
+
+#launchBtn {
+    background-color: #1b5e20;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 32px;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+#launchBtn:hover {
+    background-color: #2e7d32;
+}
+
+#launchBtn:pressed {
+    background-color: #1a4c1a;
+}
+
+#wineBtn {
+    background-color: #0f3460;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 32px;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+#wineBtn:hover {
+    background-color: #1a4a7a;
+}
+
+/* ── Status Bar ── */
+#statusLabel {
+    color: #8899aa;
+    font-size: 12px;
+    padding: 4px 16px;
+}
+
+/* ── Setup Dialog ── */
+QDialog {
+    background-color: #1a1a2e;
+}
+
+#setupHeader {
+    font-size: 20px;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+#setupPlatformLabel {
+    color: #66bb6a;
+    font-size: 13px;
+}
+
+#setupOrLabel {
+    color: #555577;
+    font-size: 12px;
+    margin: 4px 0;
+}
+
+QDialog QGroupBox#setupGroupBox {
+    color: #c0c8d4;
+    font-weight: bold;
+    border: 1px solid #0f3460;
+    border-radius: 8px;
+    margin-top: 12px;
+    padding-top: 20px;
+}
+
+QDialog QGroupBox#setupGroupBox::title {
+    subcontrol-origin: margin;
+    left: 12px;
+    padding: 0 4px;
+}
+
+QDialog QLabel {
+    color: #c0c8d4;
+    font-size: 13px;
+}
+
+QDialog QLineEdit {
+    background-color: #16213e;
+    color: #e0e0e0;
+    border: 1px solid #0f3460;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 13px;
+}
+
+QDialog QLineEdit:focus {
+    border-color: #e94560;
+}
+
+QDialog QPushButton {
+    background-color: #0f3460;
+    color: #e0e0e0;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 20px;
+    font-size: 13px;
+}
+
+QDialog QPushButton:hover {
+    background-color: #1a4a7a;
+}
+
+QDialog #dialogSetupBtn {
+    background-color: #e94560;
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 14px;
+    padding: 10px 28px;
+    border-radius: 8px;
+}
+
+QDialog #dialogSetupBtn:hover {
+    background-color: #ff6b81;
+}
+
+QProgressBar {
+    background-color: #16213e;
+    border: 1px solid #0f3460;
+    border-radius: 6px;
+    text-align: center;
+    color: #e0e0e0;
+    font-size: 12px;
+    min-height: 22px;
+}
+
+QProgressBar::chunk {
+    background-color: #e94560;
+    border-radius: 5px;
+}
+
+/* ── Scroll area ── */
+QScrollArea {
+    border: none;
+    background: transparent;
+}
+
+QScrollBar:vertical {
+    background: #16213e;
+    width: 8px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:vertical {
+    background: #0f3460;
+    border-radius: 4px;
+    min-height: 30px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: #1a4a7a;
+}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+/* ── Empty state ── */
+#emptyLabel {
+    color: #555577;
+    font-size: 16px;
+}
+
+/* ── Profile Section ── */
+#profileSection {
+    background-color: #16213e;
+    border-top: 1px solid #0f3460;
+}
+
+#profileTag {
+    color: #e0e0e0;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 2px 8px;
+}
+
+#profileScore {
+    color: #e94560;
+    font-size: 11px;
+    padding: 0px 8px;
+}
+
+#profilePicLabel {
+    border-radius: 20px;
+}
+
+#profileEditBtn {
+    background-color: transparent;
+    color: #c0c8d4;
+    border: 1px solid #0f3460;
+    border-radius: 6px;
+    font-weight: bold;
+}
+
+#profileEditBtn:hover {
+    background-color: #0f3460;
+    color: #ffffff;
+}
+
+/* ── Profile Dialog ── */
+#profileDialogHeader {
+    color: #e94560;
+    font-size: 20px;
+    font-weight: bold;
+    padding-bottom: 8px;
+}
+
+#picPreview {
+    background-color: #16213e;
+    border-radius: 8px;
+    border: 1px solid #0f3460;
+}
+
+/* ── Theme Picker ── */
+QComboBox {
+    background-color: #16213e;
+    color: #e0e0e0;
+    border: 1px solid #0f3460;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+QComboBox:hover {
+    border-color: #e94560;
+}
+
+QComboBox::drop-down {
+    border: none;
+    padding-right: 8px;
+}
+
+QComboBox QAbstractItemView {
+    background-color: #16213e;
+    color: #e0e0e0;
+    border: 1px solid #0f3460;
+    selection-background-color: #0f3460;
+    selection-color: #ffffff;
+}
+
+/* ── Wine Warning ── */
+#wineWarningLabel {
+    color: #ff6b81;
+    font-size: 12px;
+    padding: 4px;
+}

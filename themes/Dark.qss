@@ -1,0 +1,408 @@
+/* ── ReXGlue Hub Xbox 360 Dashboard Theme (Dark) ── */
+
+/* Base surfaces */
+QMainWindow {
+    background: qradialgradient(cx:0.55, cy:0.20, radius:1.2,
+                               stop:0 #2a3d52,
+                               stop:0.35 #172536,
+                               stop:1 #0b1018);
+}
+
+/* ── Sidebar ── */
+#sidebar {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba(32, 54, 74, 235),
+                                stop:0.25 rgba(20, 36, 52, 235),
+                                stop:1 rgba(10, 18, 28, 235));
+    border-right: 1px solid rgba(255, 255, 255, 18);
+}
+
+#sidebarTitle {
+    color: #b7f400;
+    font-size: 22px;
+    font-weight: bold;
+    padding: 20px 16px 4px 16px;
+}
+
+#sidebarSubtitle {
+    color: rgba(255, 255, 255, 150);
+    font-size: 11px;
+    padding: 0px 16px 16px 16px;
+}
+
+/* Profile section */
+#profileSection {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba(255, 255, 255, 10),
+                                stop:1 rgba(0, 0, 0, 35));
+    border-top: 1px solid rgba(255, 255, 255, 12);
+}
+
+#profileTag {
+    color: rgba(255, 255, 255, 220);
+    font-size: 12px;
+    font-weight: bold;
+    padding: 2px 8px;
+}
+
+#profileScore {
+    color: rgba(183, 244, 0, 210);
+    font-size: 11px;
+    padding: 0px 8px;
+}
+
+#profilePicLabel {
+    border-radius: 20px;
+}
+
+#profileEditBtn {
+    background: rgba(255, 255, 255, 10);
+    color: rgba(255, 255, 255, 210);
+    border: 1px solid rgba(255, 255, 255, 22);
+    border-radius: 6px;
+    font-weight: bold;
+}
+
+#profileEditBtn:hover {
+    background: rgba(183, 244, 0, 28);
+    border-color: rgba(183, 244, 0, 90);
+}
+
+/* ── Buttons ── */
+#refreshBtn {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba(255, 255, 255, 20),
+                                stop:0.5 rgba(255, 255, 255, 10),
+                                stop:1 rgba(0, 0, 0, 35));
+    color: rgba(255, 255, 255, 230);
+    border: 1px solid rgba(255, 255, 255, 22);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: bold;
+    margin: 8px 16px;
+}
+
+#refreshBtn:hover {
+    border-color: rgba(183, 244, 0, 80);
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba(183, 244, 0, 18),
+                                stop:1 rgba(0, 0, 0, 35));
+}
+
+#refreshBtn:pressed {
+    background: rgba(0, 0, 0, 40);
+}
+
+#setupBtn {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba(255, 255, 255, 22),
+                                stop:0.5 rgba(255, 255, 255, 12),
+                                stop:1 rgba(0, 0, 0, 45));
+    color: rgba(255, 255, 255, 240);
+    border: 1px solid rgba(255, 255, 255, 28);
+    border-radius: 10px;
+    padding: 12px 32px;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+#setupBtn:hover {
+    border-color: rgba(183, 244, 0, 80);
+}
+
+#setupBtn:pressed {
+    background: rgba(0, 0, 0, 45);
+}
+
+#setupBtn:disabled {
+    background: rgba(255, 255, 255, 10);
+    color: rgba(255, 255, 255, 90);
+    border-color: rgba(255, 255, 255, 12);
+}
+
+#launchBtn {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #b7f400,
+                                stop:0.45 #73c300,
+                                stop:1 #3f8f00);
+    color: #0b1018;
+    border: 1px solid rgba(0, 0, 0, 55);
+    border-radius: 10px;
+    padding: 12px 32px;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+#launchBtn:hover {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #c9ff2a,
+                                stop:1 #4aa400);
+}
+
+#launchBtn:pressed {
+    background: #4aa400;
+}
+
+#wineBtn {
+    background: rgba(255, 255, 255, 14);
+    color: rgba(255, 255, 255, 240);
+    border: 1px solid rgba(255, 255, 255, 24);
+    border-radius: 10px;
+    padding: 12px 32px;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+#wineBtn:hover {
+    border-color: rgba(183, 244, 0, 80);
+    background: rgba(183, 244, 0, 14);
+}
+
+/* ── Game List in Sidebar ── */
+#gameList {
+    background: transparent;
+    border: none;
+    outline: none;
+    padding: 4px 8px;
+}
+
+#gameList::item {
+    background: transparent;
+    color: rgba(255, 255, 255, 200);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin: 2px 0px;
+    font-size: 13px;
+}
+
+#gameList::item:hover {
+    background: rgba(255, 255, 255, 10);
+}
+
+#gameList::item:selected {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                                stop:0 rgba(183, 244, 0, 210),
+                                stop:1 rgba(76, 164, 0, 210));
+    color: #0b1018;
+    font-weight: bold;
+    border: 1px solid rgba(255, 255, 255, 35);
+}
+
+/* ── Detail Panel ── */
+#detailPanel {
+    background: transparent;
+}
+
+#bannerLabel {
+    background: rgba(0, 0, 0, 30);
+    border: 1px solid rgba(255, 255, 255, 14);
+    border-radius: 14px;
+}
+
+#gameTitle {
+    color: rgba(255, 255, 255, 245);
+    font-size: 30px;
+    font-weight: bold;
+}
+
+#gameDescription {
+    color: rgba(255, 255, 255, 170);
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+#platformTag {
+    background: rgba(255, 255, 255, 10);
+    color: rgba(255, 255, 255, 215);
+    border: 1px solid rgba(255, 255, 255, 18);
+    border-radius: 12px;
+    padding: 4px 14px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+#platformTagCurrent {
+    background: rgba(183, 244, 0, 24);
+    color: #b7f400;
+    border: 1px solid rgba(183, 244, 0, 80);
+    border-radius: 12px;
+    padding: 4px 14px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* ── Status Bar ── */
+#statusLabel {
+    color: rgba(255, 255, 255, 150);
+    font-size: 12px;
+    padding: 4px 16px;
+}
+
+/* ── Setup Dialog ── */
+QDialog {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #172536,
+                                stop:1 #0b1018);
+}
+
+QDialog QLabel {
+    color: rgba(255, 255, 255, 210);
+    font-size: 13px;
+}
+
+#setupHeader {
+    font-size: 20px;
+    font-weight: bold;
+    color: rgba(255, 255, 255, 245);
+}
+
+#setupPlatformLabel {
+    color: rgba(183, 244, 0, 210);
+    font-size: 13px;
+}
+
+#setupOrLabel {
+    color: rgba(255, 255, 255, 140);
+    font-size: 12px;
+    margin: 4px 0;
+}
+
+QDialog QGroupBox#setupGroupBox {
+    color: rgba(255, 255, 255, 200);
+    font-weight: bold;
+    border: 1px solid rgba(255, 255, 255, 18);
+    border-radius: 10px;
+    margin-top: 12px;
+    padding-top: 20px;
+}
+
+QDialog QGroupBox#setupGroupBox::title {
+    subcontrol-origin: margin;
+    left: 12px;
+    padding: 0 4px;
+}
+
+QDialog QLineEdit {
+    background: rgba(255, 255, 255, 10);
+    color: rgba(255, 255, 255, 235);
+    border: 1px solid rgba(255, 255, 255, 18);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
+}
+
+QDialog QLineEdit:focus {
+    border-color: rgba(183, 244, 0, 90);
+}
+
+QDialog QPushButton {
+    background: rgba(255, 255, 255, 14);
+    color: rgba(255, 255, 255, 235);
+    border: 1px solid rgba(255, 255, 255, 18);
+    border-radius: 8px;
+    padding: 8px 20px;
+    font-size: 13px;
+}
+
+QDialog QPushButton:hover {
+    border-color: rgba(183, 244, 0, 80);
+}
+
+QDialog #dialogSetupBtn {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #b7f400,
+                                stop:1 #4aa400);
+    color: #0b1018;
+    border: 1px solid rgba(0, 0, 0, 55);
+    font-weight: bold;
+}
+
+QDialog #dialogSetupBtn:hover {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #c9ff2a,
+                                stop:1 #4aa400);
+}
+
+QProgressBar {
+    background: rgba(255, 255, 255, 10);
+    border: 1px solid rgba(255, 255, 255, 18);
+    border-radius: 8px;
+    text-align: center;
+    color: rgba(255, 255, 255, 220);
+    font-size: 12px;
+    min-height: 22px;
+}
+
+QProgressBar::chunk {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                                stop:0 #b7f400,
+                                stop:1 #4aa400);
+    border-radius: 7px;
+}
+
+/* ── Scroll area ── */
+QScrollArea {
+    border: none;
+    background: transparent;
+}
+
+QScrollBar:vertical {
+    background: rgba(255, 255, 255, 6);
+    width: 8px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:vertical {
+    background: rgba(255, 255, 255, 20);
+    border-radius: 4px;
+    min-height: 30px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: rgba(183, 244, 0, 25);
+}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+/* ── Empty state ── */
+#emptyLabel {
+    color: rgba(255, 255, 255, 140);
+    font-size: 16px;
+}
+
+/* ── Theme Picker ── */
+QComboBox {
+    background: rgba(255, 255, 255, 10);
+    color: rgba(255, 255, 255, 230);
+    border: 1px solid rgba(255, 255, 255, 18);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+QComboBox:hover {
+    border-color: rgba(183, 244, 0, 80);
+}
+
+QComboBox::drop-down {
+    border: none;
+    padding-right: 8px;
+}
+
+QComboBox QAbstractItemView {
+    background: #0b1018;
+    color: rgba(255, 255, 255, 230);
+    border: 1px solid rgba(255, 255, 255, 18);
+    selection-background-color: rgba(183, 244, 0, 200);
+    selection-color: #0b1018;
+}
+
+/* ── Wine Warning ── */
+#wineWarningLabel {
+    color: rgba(255, 255, 255, 180);
+    font-size: 12px;
+    padding: 4px;
+}

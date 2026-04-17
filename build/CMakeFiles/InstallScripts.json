@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/etonedemid/rexgluestuff/rexglue-hub/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
