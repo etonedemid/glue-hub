@@ -1,9 +1,9 @@
 #!/bin/bash
-# package-hub.sh — Build and package rexglue-hub releases
+# package-hub.sh — Build and package glue-hub releases
 #
 # Produces:
-#   rexglue-hub-linux-x86_64.AppImage   (Linux)
-#   rexglue-hub-windows-x86_64.zip      (Windows, cross-compiled with llvm-mingw + Qt6)
+#   glue-hub-linux-x86_64.AppImage   (Linux)
+#   glue-hub-windows-x86_64.zip      (Windows, cross-compiled with llvm-mingw + Qt6)
 #
 # Usage: bash package-hub.sh [linux|windows|all]
 #   default: all
@@ -37,11 +37,11 @@ build_linux() {
 
     cmake --build "$BUILD_DIR" -j "$(nproc)"
 
-    [ -f "$BUILD_DIR/rexglue-hub" ] || error "Build failed — rexglue-hub not found"
+    [ -f "$BUILD_DIR/glue-hub" ] || error "Build failed — glue-hub not found"
 
     # Strip debug symbols
-    local STRIPPED="$BUILD_DIR/rexglue-hub-stripped"
-    strip -o "$STRIPPED" "$BUILD_DIR/rexglue-hub"
+    local STRIPPED="$BUILD_DIR/glue-hub-stripped"
+    strip -o "$STRIPPED" "$BUILD_DIR/glue-hub"
 
     info "Building AppImage…"
 
@@ -69,37 +69,37 @@ build_linux() {
     mkdir -p "$APPDIR/usr/share/icons/hicolor/256x256/apps"
 
     # Binary
-    cp "$STRIPPED" "$APPDIR/usr/bin/rexglue-hub"
-    chmod +x "$APPDIR/usr/bin/rexglue-hub"
+    cp "$STRIPPED" "$APPDIR/usr/bin/glue-hub"
+    chmod +x "$APPDIR/usr/bin/glue-hub"
 
     # .desktop
-    cat > "$APPDIR/usr/share/applications/rexglue-hub.desktop" <<'DESKTOP'
+    cat > "$APPDIR/usr/share/applications/glue-hub.desktop" <<'DESKTOP'
 [Desktop Entry]
-Name=ReXGlue Hub
-Exec=rexglue-hub
-Icon=rexglue-hub
+Name=Glue Hub
+Exec=glue-hub
+Icon=glue-hub
 Type=Application
 Categories=Game;Utility;
 DESKTOP
-    ln -sf usr/share/applications/rexglue-hub.desktop "$APPDIR/rexglue-hub.desktop"
+    ln -sf usr/share/applications/glue-hub.desktop "$APPDIR/glue-hub.desktop"
 
     # Icon — use a gamerpic as placeholder
     local ICON_SRC
     ICON_SRC=$(find "$SCRIPT_DIR/gamerpics" -name "*.png" 2>/dev/null | sort | head -1)
     if [ -n "$ICON_SRC" ]; then
         if command -v magick &>/dev/null; then
-            magick "$ICON_SRC" -resize 256x256 "$APPDIR/usr/share/icons/hicolor/256x256/apps/rexglue-hub.png"
+            magick "$ICON_SRC" -resize 256x256 "$APPDIR/usr/share/icons/hicolor/256x256/apps/glue-hub.png"
         elif command -v convert &>/dev/null; then
-            convert "$ICON_SRC" -resize 256x256 "$APPDIR/usr/share/icons/hicolor/256x256/apps/rexglue-hub.png"
+            convert "$ICON_SRC" -resize 256x256 "$APPDIR/usr/share/icons/hicolor/256x256/apps/glue-hub.png"
         else
-            cp "$ICON_SRC" "$APPDIR/usr/share/icons/hicolor/256x256/apps/rexglue-hub.png"
+            cp "$ICON_SRC" "$APPDIR/usr/share/icons/hicolor/256x256/apps/glue-hub.png"
         fi
     else
         printf '\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x01\x00\x00\x00\x01\x00\x08\x02\x00\x00\x00\xd3\x10?1\x00\x00\x00\x12IDATx\x9cc\xf8\x0f\x00\x00\x01\x01\x00\x05\x18\xd8N\x00\x00\x00\x00IEND\xaeB`\x82' \
-            > "$APPDIR/usr/share/icons/hicolor/256x256/apps/rexglue-hub.png"
+            > "$APPDIR/usr/share/icons/hicolor/256x256/apps/glue-hub.png"
     fi
-    ln -sf usr/share/icons/hicolor/256x256/apps/rexglue-hub.png "$APPDIR/rexglue-hub.png"
-    ln -sf rexglue-hub.png "$APPDIR/.DirIcon"
+    ln -sf usr/share/icons/hicolor/256x256/apps/glue-hub.png "$APPDIR/glue-hub.png"
+    ln -sf glue-hub.png "$APPDIR/.DirIcon"
 
     # Bundle shared libs (exclude system/GPU libs that must come from host)
     info "Bundling shared libraries…"
@@ -130,7 +130,7 @@ DESKTOP
     EXCLUDE_RE=$(printf '%s|' "${EXCLUDE_PATTERNS[@]}")
     EXCLUDE_RE="${EXCLUDE_RE%|}"
 
-    ldd "$BUILD_DIR/rexglue-hub" 2>/dev/null \
+    ldd "$BUILD_DIR/glue-hub" 2>/dev/null \
         | grep '=> /' \
         | grep -vE "$EXCLUDE_RE" \
         | awk '{print $3}' \
@@ -141,7 +141,7 @@ DESKTOP
 
     # Qt6 platform plugins (not in ldd output but needed at runtime)
     local QT6_LIBDIR
-    QT6_LIBDIR=$(ldd "$BUILD_DIR/rexglue-hub" | awk '/libQt6Core/{print $3}' | xargs dirname 2>/dev/null || true)
+    QT6_LIBDIR=$(ldd "$BUILD_DIR/glue-hub" | awk '/libQt6Core/{print $3}' | xargs dirname 2>/dev/null || true)
     local QT6_PLUGDIR=""
     for candidate in \
         "${QT6_LIBDIR}/qt6/plugins" \
@@ -183,11 +183,11 @@ HERE=${SELF%/*}
 export PATH="${HERE}/usr/bin:${PATH}"
 export LD_LIBRARY_PATH="${HERE}/usr/lib:${LD_LIBRARY_PATH:-}"
 export QT_PLUGIN_PATH="${HERE}/usr/lib/qt6/plugins"
-exec "${HERE}/usr/bin/rexglue-hub" "$@"
+exec "${HERE}/usr/bin/glue-hub" "$@"
 APPRUN
     chmod +x "$APPDIR/AppRun"
 
-    local APPIMAGE="$OUT_DIR/rexglue-hub-linux-x86_64.AppImage"
+    local APPIMAGE="$OUT_DIR/glue-hub-linux-x86_64.AppImage"
     ARCH=x86_64 "$APPIMAGETOOL" --no-appstream "$APPDIR" "$APPIMAGE"
 
     info "Linux AppImage: $APPIMAGE"
@@ -261,15 +261,15 @@ TOOLCHAIN_EOF
 
     cmake --build "$BUILD_DIR" -j "$(nproc)"
 
-    [ -f "$BUILD_DIR/rexglue-hub.exe" ] || error "Windows build failed"
+    [ -f "$BUILD_DIR/glue-hub.exe" ] || error "Windows build failed"
 
     info "Packaging Windows zip…"
 
-    local STAGING="$BUILD_DIR/rexglue-hub-windows-x86_64"
+    local STAGING="$BUILD_DIR/glue-hub-windows-x86_64"
     rm -rf "$STAGING"
     mkdir -p "$STAGING"
 
-    cp "$BUILD_DIR/rexglue-hub.exe" "$STAGING/"
+    cp "$BUILD_DIR/glue-hub.exe" "$STAGING/"
 
     # extract-xiso Windows binary (for ISO extraction on Windows)
     if [ -f "$SCRIPT_DIR/extract-xiso.exe" ]; then
@@ -320,7 +320,7 @@ QTCONF
         ! -path "$STAGING/*" \
         -exec cp {} "$STAGING/" \; 2>/dev/null || true
 
-    local ZIPFILE="$OUT_DIR/rexglue-hub-windows-x86_64.zip"
+    local ZIPFILE="$OUT_DIR/glue-hub-windows-x86_64.zip"
     rm -f "$ZIPFILE"
     (cd "$(dirname "$STAGING")" && zip -r "$ZIPFILE" "$(basename "$STAGING")")
 

@@ -21,7 +21,7 @@ void DownloadManager::downloadRelease(const QString& repoUrl, const QString& ass
     apiUrl += "/releases/latest";
 
     QNetworkRequest req{QUrl(apiUrl)};
-    req.setHeader(QNetworkRequest::UserAgentHeader, "ReXGlue-Hub/1.0");
+    req.setHeader(QNetworkRequest::UserAgentHeader, "Glue-Hub/1.0");
 
     auto* reply = m_nam.get(req);
     connect(reply, &QNetworkReply::finished, this, [this, reply, assetName, destPath]() {
@@ -62,7 +62,7 @@ void DownloadManager::startDownload(const QUrl& url, const QString& destPath) {
     QDir().mkpath(QFileInfo(destPath).absolutePath());
 
     QNetworkRequest req(url);
-    req.setHeader(QNetworkRequest::UserAgentHeader, "ReXGlue-Hub/1.0");
+    req.setHeader(QNetworkRequest::UserAgentHeader, "Glue-Hub/1.0");
     req.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
 
     auto* reply = m_nam.get(req);

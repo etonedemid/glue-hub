@@ -21,6 +21,8 @@
 #include <QMessageBox>
 #include <QPropertyAnimation>
 #include <QGraphicsOpacityEffect>
+#include <QSequentialAnimationGroup>
+#include <QTimer>
 #include <QComboBox>
 #include <QStyle>
 #include <QPainter>
@@ -32,7 +34,7 @@
 HubWindow::HubWindow(QWidget* parent)
     : QMainWindow(parent)
 {
-    setWindowTitle("ReXGlue Hub");
+    setWindowTitle("Glue Hub");
     setMinimumSize(960, 600);
     resize(1100, 700);
 
@@ -50,6 +52,9 @@ HubWindow::HubWindow(QWidget* parent)
             this, &HubWindow::onUpdateAvailable);
     connect(&m_updateChecker, &UpdateChecker::upToDate,
             this, &HubWindow::onUpdateUpToDate);
+
+    // Install event filter on the application to catch keys globally
+    qApp->installEventFilter(this);
 
     // Auto-refresh on start
     QMetaObject::invokeMethod(this, &HubWindow::onRefresh, Qt::QueuedConnection);
@@ -71,7 +76,7 @@ void HubWindow::buildUi() {
     sideLayout->setContentsMargins(0, 0, 0, 12);
     sideLayout->setSpacing(0);
 
-    auto* title = new QLabel("ReXGlue Hub");
+    auto* title = new QLabel("Glue Hub");
     title->setObjectName("sidebarTitle");
     sideLayout->addWidget(title);
 
@@ -807,4 +812,135 @@ void HubWindow::onUpdateAvailable(const QString& latestTag, const QString& relea
 void HubWindow::onUpdateUpToDate() {
     m_updateBtn->setVisible(false);
     m_pendingUpdateUrl.clear();
+}
+
+// ── Konami Code Easter Egg ──
+
+bool HubWindow::eventFilter(QObject* obj, QEvent* event) {
+    if (event->type() == QEvent::KeyPress) {
+        auto* ke = static_cast<QKeyEvent*>(event);
+        handleKonamiKey(ke->key());
+    }
+    return QMainWindow::eventFilter(obj, event);
+}
+
+void HubWindow::handleKonamiKey(int key) {
+    static const QVector<int> konamiCode = {
+        Qt::Key_Up, Qt::Key_Up, Qt::Key_Down, Qt::Key_Down,
+        Qt::Key_Left, Qt::Key_Right, Qt::Key_Left, Qt::Key_Right,
+        Qt::Key_B, Qt::Key_A
+    };
+
+    if (m_konamiTriggered)
+        return;
+
+    int expected = konamiCode.value(m_konamiProgress.size(), -1);
+    if (key == expected) {
+        m_konamiProgress.append(key);
+        if (m_konamiProgress.size() == konamiCode.size()) {
+            m_konamiTriggered = true;
+            showAchievementToast(
+                "ReXGlue OG",
+                "You know the code. Welcome home.",
+                0
+            );
+        }
+    } else {
+        m_konamiProgress.clear();
+        if (key == konamiCode.first())
+            m_konamiProgress.append(key);
+    }
+}
+
+void HubWindow::showAchievementToast(const QString& title, const QString& desc, int gamerscore) {
+    // Xbox 360-style achievement popup: slides up from bottom-right with the iconic sound-like feel
+
+    auto* toast = new QWidget(this);
+    toast->setObjectName("achievementToast");
+    toast->setAttribute(Qt::WA_DeleteOnClose);
+    toast->setFixedSize(360, 80);
+
+    auto* layout = new QHBoxLayout(toast);
+    layout->setContentsMargins(12, 8, 16, 8);
+    layout->setSpacing(12);
+
+    // Achievement icon (Xbox-style circle)
+    auto* iconLabel = new QLabel;
+    iconLabel->setFixedSize(48, 48);
+    iconLabel->setAlignment(Qt::AlignCenter);
+    QPixmap iconPm(48, 48);
+    iconPm.fill(Qt::transparent);
+    {
+        QPainter p(&iconPm);
+        p.setRenderHint(QPainter::Antialiasing);
+        p.setBrush(QColor("#107C10")); // Xbox green
+        p.setPen(Qt::NoPen);
+        p.drawEllipse(2, 2, 44, 44);
+        p.setPen(QColor("#ffffff"));
+        QFont f = p.font();
+        f.setPixelSize(20);
+        f.setBold(true);
+        p.setFont(f);
+        p.drawText(QRect(2, 2, 44, 44), Qt::AlignCenter, "★");
+    }
+    iconLabel->setPixmap(iconPm);
+    layout->addWidget(iconLabel);
+
+    // Text
+    auto* textLayout = new QVBoxLayout;
+    textLayout->setSpacing(2);
+
+    auto* headerLabel = new QLabel("Achievement Unlocked");
+    headerLabel->setStyleSheet("color: #b7f400; font-size: 11px; font-weight: bold; background: transparent;");
+    textLayout->addWidget(headerLabel);
+
+    auto* titleLabel = new QLabel(title);
+    titleLabel->setStyleSheet("color: #ffffff; font-size: 14px; font-weight: bold; background: transparent;");
+    textLayout->addWidget(titleLabel);
+
+    auto* descLabel = new QLabel(desc + (gamerscore > 0 ? QString(" — %1G").arg(gamerscore) : ""));
+    descLabel->setStyleSheet("color: #cccccc; font-size: 11px; background: transparent;");
+    textLayout->addWidget(descLabel);
+
+    layout->addLayout(textLayout, 1);
+
+    toast->setStyleSheet(
+        "#achievementToast {"
+        "  background: qlineargradient(x1:0, y1:0, x2:1, y2:0,"
+        "    stop:0 rgba(16, 124, 16, 230), stop:0.03 rgba(16, 124, 16, 230),"
+        "    stop:0.04 rgba(30, 30, 30, 240), stop:1 rgba(40, 40, 40, 240));"
+        "  border: 2px solid #107C10;"
+        "  border-radius: 8px;"
+        "}"
+    );
+
+    // Position: bottom-right, start off-screen
+    int startY = height();
+    int endY = height() - 100;
+    int xPos = width() - 380;
+    toast->move(xPos, startY);
+    toast->show();
+    toast->raise();
+
+    // Slide up animation
+    auto* slideUp = new QPropertyAnimation(toast, "pos");
+    slideUp->setDuration(400);
+    slideUp->setStartValue(QPoint(xPos, startY));
+    slideUp->setEndValue(QPoint(xPos, endY));
+    slideUp->setEasingCurve(QEasingCurve::OutCubic);
+
+    // Slide back down after a pause
+    auto* slideDown = new QPropertyAnimation(toast, "pos");
+    slideDown->setDuration(500);
+    slideDown->setStartValue(QPoint(xPos, endY));
+    slideDown->setEndValue(QPoint(xPos, startY));
+    slideDown->setEasingCurve(QEasingCurve::InCubic);
+
+    auto* group = new QSequentialAnimationGroup(toast);
+    group->addAnimation(slideUp);
+    group->addPause(3500);
+    group->addAnimation(slideDown);
+
+    connect(group, &QSequentialAnimationGroup::finished, toast, &QWidget::close);
+    group->start(QAbstractAnimation::DeleteWhenStopped);
 }

@@ -22,7 +22,7 @@ void UpdateChecker::check(const QString& githubRepo, const QString& installedTag
     apiUrl += "/releases/latest";
 
     QNetworkRequest req{QUrl(apiUrl)};
-    req.setHeader(QNetworkRequest::UserAgentHeader, "ReXGlue-Hub/1.0");
+    req.setHeader(QNetworkRequest::UserAgentHeader, "Glue-Hub/1.0");
 
     auto* reply = m_nam.get(req);
     connect(reply, &QNetworkReply::finished, this, [this, reply, installedTag]() {
