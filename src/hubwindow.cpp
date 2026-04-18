@@ -53,6 +53,26 @@ HubWindow::HubWindow(QWidget* parent)
     connect(&m_updateChecker, &UpdateChecker::upToDate,
             this, &HubWindow::onUpdateUpToDate);
 
+    connect(&m_updateDownloader, &DownloadManager::progress, this,
+            [this](qint64 recv, qint64 total) {
+                if (total > 0) {
+                    m_updateProgress->setValue(static_cast<int>(recv * 100 / total));
+                    m_updateStatus->setText(QString("Downloading… %1 / %2 MB")
+                        .arg(recv / 1048576.0, 0, 'f', 1)
+                        .arg(total / 1048576.0, 0, 'f', 1));
+                }
+            });
+    connect(&m_updateDownloader, &DownloadManager::releaseTagFetched, this,
+            [this](const QString& tag) { m_latestTag = tag; });
+    connect(&m_updateDownloader, &DownloadManager::finished,
+            this, &HubWindow::onUpdateDownloadFinished);
+    connect(&m_updateDownloader, &DownloadManager::errorOccurred, this,
+            [this](const QString& msg) {
+                m_updateStatus->setText("Update failed: " + msg);
+                m_updateBtn->setEnabled(true);
+                m_updateProgress->setVisible(false);
+            });
+
     // Install event filter on the application to catch keys globally
     qApp->installEventFilter(this);
 
@@ -203,6 +223,19 @@ void HubWindow::buildUi() {
     m_updateBtn->setVisible(false);
     connect(m_updateBtn, &QPushButton::clicked, this, &HubWindow::onUpdateClicked);
     btnLayout->addWidget(m_updateBtn);
+
+    // Inline update progress (hidden until an update download is active)
+    m_updateProgress = new QProgressBar;
+    m_updateProgress->setObjectName("updateProgress");
+    m_updateProgress->setRange(0, 100);
+    m_updateProgress->setVisible(false);
+    m_updateProgress->setFixedHeight(8);
+    detailLayout->addWidget(m_updateProgress);
+
+    m_updateStatus = new QLabel;
+    m_updateStatus->setObjectName("statusLabel");
+    m_updateStatus->setVisible(false);
+    detailLayout->addWidget(m_updateStatus);
 
     m_wineBtn = new QPushButton("🍷  Launch with Wine");
     m_wineBtn->setObjectName("wineBtn");
@@ -390,8 +423,15 @@ void HubWindow::showGameDetail(const GameInfo& info) {
     m_launchBtn->setVisible(installed && currentSupported);
 
     // Update button — hidden until the async check resolves
+    m_updateBtn->setEnabled(true);
     m_updateBtn->setVisible(false);
+    m_updateProgress->setVisible(false);
+    m_updateStatus->setVisible(false);
     m_pendingUpdateUrl.clear();
+    m_latestTag.clear();
+    m_updateInstallDir = installDir;
+    m_updateAssetName  = info.releasePacketForPlatform(currentPlatformName());
+    m_updateGithubRepo = info.githubRepo;
     if (installed && !info.githubRepo.isEmpty()) {
         // Read the installed version tag from the setup config
         QString installedTag;
@@ -799,13 +839,111 @@ QString HubWindow::findWineBinary() const {
 }
 
 void HubWindow::onUpdateClicked() {
-    if (!m_pendingUpdateUrl.isEmpty())
+    if (m_updateAssetName.isEmpty() || m_updateGithubRepo.isEmpty()) {
         QDesktopServices::openUrl(QUrl(m_pendingUpdateUrl));
+        return;
+    }
+
+    m_updateBtn->setEnabled(false);
+    m_updateProgress->setValue(0);
+    m_updateProgress->setVisible(true);
+    m_updateStatus->setText("Fetching release info…");
+    m_updateStatus->setVisible(true);
+
+    QString tmpPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation)
+                      + "/" + m_updateAssetName;
+    m_updateDownloader.downloadRelease(m_updateGithubRepo, m_updateAssetName, tmpPath);
+}
+
+void HubWindow::onUpdateDownloadFinished(const QString& filePath) {
+    m_updateStatus->setText("Installing update…");
+
+    // Read existing assets_path from setup JSON so we can preserve it
+    QString assetsPath;
+    {
+        QFile cfgFile(m_updateInstallDir + "/rexglue-setup.json");
+        if (cfgFile.open(QIODevice::ReadOnly)) {
+            assetsPath = QJsonDocument::fromJson(cfgFile.readAll()).object()["assets_path"].toString();
+        }
+    }
+
+    auto writeConfig = [this, assetsPath]() {
+        QJsonObject cfg;
+        cfg["assets_path"] = assetsPath;
+        if (!m_latestTag.isEmpty())
+            cfg["installed_version"] = m_latestTag;
+        QFile cfgFile(m_updateInstallDir + "/rexglue-setup.json");
+        if (cfgFile.open(QIODevice::WriteOnly))
+            cfgFile.write(QJsonDocument(cfg).toJson());
+    };
+
+    auto onDone = [this, writeConfig]() {
+        writeConfig();
+        m_updateProgress->setValue(100);
+        m_updateStatus->setText("Update complete!");
+        m_updateBtn->setVisible(false);
+        // Refresh the detail view so the version is updated
+        if (m_currentIndex >= 0)
+            showGameDetail(m_repo.games().at(m_currentIndex));
+    };
+
+    auto onFail = [this](const QString& reason) {
+        m_updateStatus->setText("Update failed: " + reason);
+        m_updateBtn->setEnabled(true);
+        m_updateProgress->setVisible(false);
+    };
+
+    if (filePath.endsWith(".zip")) {
+        QDir().mkpath(m_updateInstallDir);
+        auto* proc = new QProcess(this);
+#ifdef Q_OS_WIN
+        QString psCmd = QString("Expand-Archive -LiteralPath \"%1\" -DestinationPath \"%2\" -Force")
+                            .arg(filePath, m_updateInstallDir);
+        proc->start("powershell", {"-NoProfile", "-NonInteractive", "-Command", psCmd});
+#else
+        proc->start("unzip", {"-o", filePath, "-d", m_updateInstallDir});
+#endif
+        connect(proc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this,
+                [proc, onDone, onFail](int code, QProcess::ExitStatus) {
+            proc->deleteLater();
+            if (code != 0) onFail(QString("unzip exited with %1").arg(code));
+            else           onDone();
+        });
+    } else if (filePath.endsWith(".tar.gz") || filePath.endsWith(".tgz")) {
+        QDir().mkpath(m_updateInstallDir);
+        auto* proc = new QProcess(this);
+        proc->start("tar", {"xzf", filePath, "-C", m_updateInstallDir});
+        connect(proc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this,
+                [proc, onDone, onFail](int code, QProcess::ExitStatus) {
+            proc->deleteLater();
+            if (code != 0) onFail(QString("tar exited with %1").arg(code));
+            else           onDone();
+        });
+    } else if (filePath.endsWith(".AppImage", Qt::CaseInsensitive)) {
+        // Replace the existing AppImage in the install dir
+        QDir idir(m_updateInstallDir);
+        for (const auto& old : idir.entryList({"*.AppImage", "*.appimage"}, QDir::Files))
+            QFile::remove(idir.filePath(old));
+
+        QString dest = m_updateInstallDir + "/" + QFileInfo(filePath).fileName();
+        QFile::rename(filePath, dest);
+        QFile::setPermissions(dest,
+            QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner |
+            QFileDevice::ReadGroup | QFileDevice::ExeGroup |
+            QFileDevice::ReadOther  | QFileDevice::ExeOther);
+        onDone();
+    } else {
+        // Unknown type — just move to install dir
+        QString dest = m_updateInstallDir + "/" + QFileInfo(filePath).fileName();
+        QFile::rename(filePath, dest);
+        onDone();
+    }
 }
 
 void HubWindow::onUpdateAvailable(const QString& latestTag, const QString& releaseUrl) {
     m_pendingUpdateUrl = releaseUrl;
-    m_updateBtn->setText(QString("↑ Update (%1)").arg(latestTag));
+    m_latestTag = latestTag;
+    m_updateBtn->setText(QString("\u2191 Update (%1)").arg(latestTag));
     m_updateBtn->setVisible(true);
 }
 
