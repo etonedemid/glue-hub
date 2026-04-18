@@ -44,15 +44,28 @@ struct HubGamerProfile {
     QList<HubPlaytime> playtime;
 };
 
+struct HubProfileEntry {
+    quint64 xuid;
+    QString gamertag;
+};
+
 class GamerProfileHub {
 public:
     static GamerProfileHub& instance();
 
     QString sharedRoot() const;
+    QString profileRoot() const;  // per-XUID: sharedRoot()/profiles/{XUID}/
     QString profilePath() const;
     QString playtimePath() const;
     QString gamerpicsDir() const;
     QString achievementsDir() const;
+
+    void setActiveXuid(quint64 xuid);
+    quint64 activeXuid() const { return m_activeXuid; }
+
+    QList<HubProfileEntry> enumerateProfiles() const;
+    void saveProfileIndex() const;
+    void migrateLegacyData();
 
     bool profileExists() const;
     bool load();
@@ -73,4 +86,5 @@ public:
 private:
     GamerProfileHub() = default;
     HubGamerProfile m_profile;
+    quint64 m_activeXuid = 0;
 };

@@ -10,6 +10,10 @@
 #include <QDir>
 #include <QDesktopServices>
 #include <QUrl>
+#include <QCoreApplication>
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 SetupDialog::SetupDialog(const GameInfo& info, QWidget* parent)
     : QDialog(parent), m_info(info)
@@ -149,8 +153,20 @@ void SetupDialog::onSetup() {
         QString assetsDir = installDir + "/assets";
         QDir().mkpath(assetsDir);
 
-        // Use extract-xiso if available, otherwise just copy the ISO path
-        proc->start("extract-xiso", {"-x", m_isoPath->text(), "-d", assetsDir});
+        // Use extract-xiso bundled next to this executable, falling back to PATH
+        QString extractor;
+        QString exeDir = QCoreApplication::applicationDirPath();
+#ifdef Q_OS_WIN
+        QString bundled = exeDir + "/extract-xiso.exe";
+#else
+        QString bundled = exeDir + "/extract-xiso";
+#endif
+        if (QFile::exists(bundled))
+            extractor = bundled;
+        else
+            extractor = "extract-xiso";
+
+        proc->start(extractor, {"-x", "-d", assetsDir, m_isoPath->text()});
         connect(proc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
                 this, [this, proc, assetsDir, installDir](int code, QProcess::ExitStatus) {
             proc->deleteLater();
@@ -214,28 +230,59 @@ void SetupDialog::extractAndSetup(const QString& archivePath) {
     // Extract archive based on type
     if (archivePath.endsWith(".zip")) {
         QProcess* proc = new QProcess(this);
+#ifdef Q_OS_WIN
+        // PowerShell's Expand-Archive works on all modern Windows (no unzip needed)
+        QString psCmd = QString("Expand-Archive -LiteralPath \"%1\" -DestinationPath \"%2\" -Force")
+                            .arg(archivePath, installDir);
+        proc->start("powershell", {"-NoProfile", "-NonInteractive", "-Command", psCmd});
+#else
         proc->start("unzip", {"-o", archivePath, "-d", installDir});
+#endif
         connect(proc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
-                this, [this, proc, installDir](int, QProcess::ExitStatus) {
+                this, [this, proc, installDir](int code, QProcess::ExitStatus) {
             proc->deleteLater();
+            if (code != 0) {
+                m_statusLabel->setText("Extraction failed (exit code " + QString::number(code) + ")");
+                m_setupBtn->setEnabled(true);
+                return;
+            }
             m_progress->setValue(100);
             m_statusLabel->setText("Setup complete!");
             QMessageBox::information(this, "Setup Complete",
                                      "Game installed to:\n" + installDir +
                                      "\n\nAssets path:\n" + m_assetsPath->text());
+            {
+                QJsonObject cfg;
+                cfg["assets_path"] = m_assetsPath->text();
+                QFile cfgFile(installDir + "/rexglue-setup.json");
+                if (cfgFile.open(QIODevice::WriteOnly))
+                    cfgFile.write(QJsonDocument(cfg).toJson());
+            } // cfgFile closed/flushed before accept()
             accept();
         });
     } else if (archivePath.endsWith(".tar.gz") || archivePath.endsWith(".tgz")) {
         QProcess* proc = new QProcess(this);
         proc->start("tar", {"xzf", archivePath, "-C", installDir});
         connect(proc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
-                this, [this, proc, installDir](int, QProcess::ExitStatus) {
+                this, [this, proc, installDir](int code, QProcess::ExitStatus) {
             proc->deleteLater();
+            if (code != 0) {
+                m_statusLabel->setText("Extraction failed (exit code " + QString::number(code) + ")");
+                m_setupBtn->setEnabled(true);
+                return;
+            }
             m_progress->setValue(100);
             m_statusLabel->setText("Setup complete!");
             QMessageBox::information(this, "Setup Complete",
                                      "Game installed to:\n" + installDir +
                                      "\n\nAssets path:\n" + m_assetsPath->text());
+            {
+                QJsonObject cfg;
+                cfg["assets_path"] = m_assetsPath->text();
+                QFile cfgFile(installDir + "/rexglue-setup.json");
+                if (cfgFile.open(QIODevice::WriteOnly))
+                    cfgFile.write(QJsonDocument(cfg).toJson());
+            } // cfgFile closed/flushed before accept()
             accept();
         });
     } else if (archivePath.endsWith(".AppImage", Qt::CaseInsensitive) || archivePath.endsWith(".appimage", Qt::CaseInsensitive)) {
@@ -249,6 +296,13 @@ void SetupDialog::extractAndSetup(const QString& archivePath) {
         QMessageBox::information(this, "Setup Complete",
                                  "AppImage ready at:\n" + archivePath +
                                  "\n\nRun it with:\n" + archivePath + " " + m_assetsPath->text());
+        {
+            QJsonObject cfg;
+            cfg["assets_path"] = m_assetsPath->text();
+            QFile cfgFile(installDir + "/rexglue-setup.json");
+            if (cfgFile.open(QIODevice::WriteOnly))
+                cfgFile.write(QJsonDocument(cfg).toJson());
+        }
         accept();
     } else if (archivePath.endsWith(".apk")) {
         m_progress->setValue(100);
@@ -256,10 +310,24 @@ void SetupDialog::extractAndSetup(const QString& archivePath) {
         QMessageBox::information(this, "Setup Complete",
                                  "APK downloaded to:\n" + archivePath +
                                  "\n\nTransfer to your Android device and install.");
+        {
+            QJsonObject cfg;
+            cfg["assets_path"] = m_assetsPath->text();
+            QFile cfgFile(installDir + "/rexglue-setup.json");
+            if (cfgFile.open(QIODevice::WriteOnly))
+                cfgFile.write(QJsonDocument(cfg).toJson());
+        }
         accept();
     } else {
         m_progress->setValue(100);
         m_statusLabel->setText("Downloaded: " + archivePath);
+        {
+            QJsonObject cfg;
+            cfg["assets_path"] = m_assetsPath->text();
+            QFile cfgFile(installDir + "/rexglue-setup.json");
+            if (cfgFile.open(QIODevice::WriteOnly))
+                cfgFile.write(QJsonDocument(cfg).toJson());
+        }
         accept();
     }
 }

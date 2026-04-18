@@ -11,15 +11,20 @@
 #include <QSplitter>
 #include <QPixmap>
 #include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QProcess>
 #include <QStandardPaths>
 #include <QDir>
+#include <QFileInfo>
 #include <QMessageBox>
 #include <QPropertyAnimation>
 #include <QGraphicsOpacityEffect>
 #include <QComboBox>
 #include <QStyle>
 #include <QPainter>
+#include <QMenu>
+#include <QSettings>
 
 HubWindow::HubWindow(QWidget* parent)
     : QMainWindow(parent)
@@ -341,10 +346,27 @@ void HubWindow::showGameDetail(const GameInfo& info) {
     m_setupBtn->setVisible(currentSupported);
     m_setupBtn->setEnabled(currentSupported);
 
-    // Check if already installed
+    // Check if already installed: prefer sentinel file, fall back to exe/AppImage check
     QString installDir = QStandardPaths::writableLocation(QStandardPaths::HomeLocation)
                          + "/ReXGlue/" + info.id;
-    bool installed = QDir(installDir).exists();
+    bool installed = QFile::exists(installDir + "/rexglue-setup.json");
+    if (!installed) {
+        QDir idir(installDir);
+        if (!idir.entryList({"*.AppImage", "*.appimage"}, QDir::Files).isEmpty())
+            installed = true;
+        if (!installed) {
+            for (const auto& sub : idir.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
+                QDir sdir(idir.filePath(sub));
+                for (const auto& f : sdir.entryList({"*.exe"}, QDir::Files)) {
+                    if (!f.contains("extract-xiso", Qt::CaseInsensitive)) {
+                        installed = true;
+                        break;
+                    }
+                }
+                if (installed) break;
+            }
+        }
+    }
     m_launchBtn->setVisible(installed && currentSupported);
 
     // Wine/Proton: show for Windows-only games on Linux
@@ -427,12 +449,23 @@ void HubWindow::onLaunchClicked() {
     for (const auto& f : dir.entryList({"*.exe"}, QDir::Files))
         execs << dir.filePath(f);
 
-    // Look for bare executable in subdirs
+    // Look for game exe / bare executable in subdirs
     if (execs.isEmpty()) {
         for (const auto& subdir : dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
             QDir sub(dir.filePath(subdir));
-            for (const auto& f : sub.entryList(QDir::Files | QDir::Executable)) {
-                execs << sub.filePath(f);
+            // Windows: .exe files, skip known utility binaries
+            for (const auto& f : sub.entryList({"*.exe"}, QDir::Files)) {
+                if (!f.contains("extract-xiso", Qt::CaseInsensitive))
+                    execs << sub.filePath(f);
+            }
+            // Linux/macOS: executable bit set, skip DLLs and .so files
+            if (execs.isEmpty()) {
+                for (const auto& f : sub.entryList(QDir::Files | QDir::Executable)) {
+                    if (!f.endsWith(".dll", Qt::CaseInsensitive) &&
+                        !f.endsWith(".so", Qt::CaseInsensitive) &&
+                        !f.contains("extract-xiso", Qt::CaseInsensitive))
+                        execs << sub.filePath(f);
+                }
             }
         }
     }
@@ -442,16 +475,26 @@ void HubWindow::onLaunchClicked() {
         return;
     }
 
-    // Find assets
-    QString assetsDir = installDir + "/assets";
-    if (!QDir(assetsDir).exists())
-        assetsDir.clear();
+    // Find assets — read persisted assets path from setup config
+    QString assetsDir;
+    {
+        QFile cfgFile(installDir + "/rexglue-setup.json");
+        if (cfgFile.open(QIODevice::ReadOnly)) {
+            auto doc = QJsonDocument::fromJson(cfgFile.readAll());
+            assetsDir = doc.object()["assets_path"].toString();
+        }
+    }
+    // Fallback to installDir/assets for legacy installs
+    if (assetsDir.isEmpty() || !QDir(assetsDir).exists())
+        assetsDir = QDir(installDir + "/assets").exists() ? installDir + "/assets" : QString();
 
     QStringList args;
     if (!assetsDir.isEmpty())
         args << assetsDir;
 
-    QProcess::startDetached(execs.first(), args, installDir);
+    // Use the exe's own directory as working dir so renut.toml is found correctly
+    QString exeDir = QFileInfo(execs.first()).absolutePath();
+    QProcess::startDetached(execs.first(), args, exeDir);
 }
 
 void HubWindow::onLaunchWithWineClicked() {
@@ -488,6 +531,17 @@ void HubWindow::onLaunchWithWineClicked() {
     }
 
     if (execs.isEmpty()) {
+        // Also check subdirs for .exe
+        for (const auto& subdir : dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
+            QDir sub(dir.filePath(subdir));
+            for (const auto& f : sub.entryList({"*.exe"}, QDir::Files)) {
+                if (!f.contains("extract-xiso", Qt::CaseInsensitive))
+                    execs << sub.filePath(f);
+            }
+        }
+    }
+
+    if (execs.isEmpty()) {
         QMessageBox::warning(this, "Launch Failed", "No Windows executable found in:\n" + installDir);
         return;
     }
@@ -500,14 +554,25 @@ void HubWindow::onLaunchWithWineClicked() {
         return;
     }
 
-    // Find assets
-    QString assetsDir = installDir + "/assets";
+    // Find assets — read persisted assets path from setup config
+    QString assetsDir;
+    {
+        QFile cfgFile(installDir + "/rexglue-setup.json");
+        if (cfgFile.open(QIODevice::ReadOnly)) {
+            auto doc = QJsonDocument::fromJson(cfgFile.readAll());
+            assetsDir = doc.object()["assets_path"].toString();
+        }
+    }
+    if (assetsDir.isEmpty() || !QDir(assetsDir).exists())
+        assetsDir = QDir(installDir + "/assets").exists() ? installDir + "/assets" : QString();
+
     QStringList wineArgs;
     wineArgs << execs.first();
-    if (QDir(assetsDir).exists())
+    if (!assetsDir.isEmpty())
         wineArgs << assetsDir;
 
-    QProcess::startDetached(wineBin, wineArgs, installDir);
+    QString exeDir = QFileInfo(execs.first()).absolutePath();
+    QProcess::startDetached(wineBin, wineArgs, exeDir);
 }
 
 void HubWindow::onThemeChanged(const QString& theme) {
@@ -515,15 +580,48 @@ void HubWindow::onThemeChanged(const QString& theme) {
 }
 
 void HubWindow::onEditProfile() {
-    ProfileDialog dlg(this);
     auto& gph = GamerProfileHub::instance();
-    // Pre-fill if possible (the dialog could be extended, for now just re-create)
-    if (dlg.exec() == QDialog::Accepted) {
-        gph.setGamertag(dlg.gamertag());
-        if (!dlg.selectedGamepic().isEmpty())
-            gph.setGamepic(dlg.selectedGamepic());
-        updateProfileDisplay();
+    auto profiles = gph.enumerateProfiles();
+    quint64 currentXuid = gph.activeXuid();
+
+    QMenu menu(this);
+    menu.setObjectName("profileSwitchMenu");
+
+    // List all existing profiles
+    for (const auto& p : profiles) {
+        QString label = p.gamertag;
+        if (p.xuid == currentXuid)
+            label += "  \u2713";   // checkmark for active profile
+        QAction* action = menu.addAction(label);
+        action->setData(p.xuid);
     }
+
+    if (!profiles.isEmpty())
+        menu.addSeparator();
+
+    QAction* createAction = menu.addAction("+ Create New Profile");
+
+    QAction* chosen = menu.exec(QCursor::pos());
+    if (!chosen)
+        return;
+
+    if (chosen == createAction) {
+        ProfileDialog dlg(this);
+        if (dlg.exec() == QDialog::Accepted) {
+            gph.createProfile(dlg.gamertag(), dlg.selectedGamepic());
+            QSettings settings;
+            settings.setValue("profile/remembered_xuid", gph.activeXuid());
+        }
+    } else {
+        quint64 xuid = chosen->data().toULongLong();
+        if (xuid != currentXuid) {
+            gph.setActiveXuid(xuid);
+            gph.load();
+            QSettings settings;
+            settings.setValue("profile/remembered_xuid", xuid);
+        }
+    }
+    updateProfileDisplay();
 }
 
 void HubWindow::populateAchievements(uint32_t titleId) {

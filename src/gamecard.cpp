@@ -28,29 +28,34 @@ void GameCard::paintEvent(QPaintEvent*) {
     // Background
     p.fillRect(r, QColor("#16213e"));
 
-    // Boxart
+    // Boxart — fill entire card, title overlaid at bottom
     if (!m_info.boxart.isNull()) {
-        QPixmap scaled = m_info.boxart.scaled(width(), 200,
+        QPixmap scaled = m_info.boxart.scaled(width(), height(),
                                                Qt::KeepAspectRatioByExpanding,
                                                Qt::SmoothTransformation);
         int sx = (scaled.width() - width()) / 2;
-        int sy = (scaled.height() - 200) / 2;
-        p.drawPixmap(0, 0, scaled, sx, sy, width(), 200);
+        int sy = (scaled.height() - height()) / 2;
+        p.drawPixmap(0, 0, scaled, sx, sy, width(), height());
     } else {
-        p.fillRect(QRectF(0, 0, width(), 200), QColor("#0d0d1a"));
+        p.fillRect(r, QColor("#0d0d1a"));
         p.setPen(QColor("#555577"));
-        p.drawText(QRectF(0, 0, width(), 200), Qt::AlignCenter, "No Cover");
+        p.drawText(r, Qt::AlignCenter, "No Cover");
     }
 
-    // Title strip
-    p.fillRect(QRectF(0, 200, width(), 60), QColor(22, 33, 62, 240));
+    // Gradient overlay at bottom for title readability
+    QLinearGradient grad(0, height() - 80, 0, height());
+    grad.setColorAt(0.0, QColor(0, 0, 0, 0));
+    grad.setColorAt(1.0, QColor(0, 0, 0, 200));
+    p.fillRect(QRectF(0, height() - 80, width(), 80), grad);
+
+    // Title text overlaid at bottom
     p.setPen(Qt::white);
     QFont f = p.font();
     f.setPixelSize(13);
     f.setBold(true);
     p.setFont(f);
-    p.drawText(QRectF(10, 206, width() - 20, 48),
-               Qt::AlignLeft | Qt::AlignTop | Qt::TextWordWrap,
+    p.drawText(QRectF(10, height() - 54, width() - 20, 48),
+               Qt::AlignLeft | Qt::AlignBottom | Qt::TextWordWrap,
                m_info.name);
 
     // Hover glow

@@ -1,0 +1,19 @@
+# Build output
+build/
+build-release/
+build-win-release/
+build-linux-*/
+build-win-*/
+
+# Release artifacts
+release/
+squashfs-root/
+*.AppImage
+*.tar.gz
+
+# Qt packaging log
+aqtinstall.log
+
+# Misc
+*.o
+*.a

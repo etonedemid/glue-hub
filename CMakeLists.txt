@@ -8,7 +8,7 @@ set(CMAKE_AUTORCC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets Network)
 
-add_executable(rexglue-hub
+add_executable(rexglue-hub WIN32
     src/main.cpp
     src/hubwindow.cpp
     src/hubwindow.h
@@ -26,6 +26,8 @@ add_executable(rexglue-hub
     src/gamerprofile.h
     src/profiledialog.cpp
     src/profiledialog.h
+    src/profilechooser.cpp
+    src/profilechooser.h
     src/thememanager.cpp
     src/thememanager.h
     resources.qrc
