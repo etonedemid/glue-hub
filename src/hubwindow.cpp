@@ -3,6 +3,7 @@
 #include "gamerprofile.h"
 #include "profiledialog.h"
 #include "thememanager.h"
+#include "updatechecker.h"
 
 #include <QApplication>
 #include <QHBoxLayout>
@@ -25,6 +26,8 @@
 #include <QPainter>
 #include <QMenu>
 #include <QSettings>
+#include <QDesktopServices>
+#include <QUrl>
 
 HubWindow::HubWindow(QWidget* parent)
     : QMainWindow(parent)
@@ -42,6 +45,11 @@ HubWindow::HubWindow(QWidget* parent)
     connect(&m_repo, &RepoManager::errorOccurred, this, [this](const QString& msg) {
         m_statusLabel->setText("Error: " + msg);
     });
+
+    connect(&m_updateChecker, &UpdateChecker::updateAvailable,
+            this, &HubWindow::onUpdateAvailable);
+    connect(&m_updateChecker, &UpdateChecker::upToDate,
+            this, &HubWindow::onUpdateUpToDate);
 
     // Auto-refresh on start
     QMetaObject::invokeMethod(this, &HubWindow::onRefresh, Qt::QueuedConnection);
@@ -185,6 +193,12 @@ void HubWindow::buildUi() {
     connect(m_launchBtn, &QPushButton::clicked, this, &HubWindow::onLaunchClicked);
     btnLayout->addWidget(m_launchBtn);
 
+    m_updateBtn = new QPushButton("↑ Update");
+    m_updateBtn->setObjectName("updateBtn");
+    m_updateBtn->setVisible(false);
+    connect(m_updateBtn, &QPushButton::clicked, this, &HubWindow::onUpdateClicked);
+    btnLayout->addWidget(m_updateBtn);
+
     m_wineBtn = new QPushButton("🍷  Launch with Wine");
     m_wineBtn->setObjectName("wineBtn");
     m_wineBtn->setVisible(false);
@@ -285,6 +299,7 @@ void HubWindow::showEmptyState() {
     m_platformContainer->setVisible(false);
     m_setupBtn->setVisible(false);
     m_launchBtn->setVisible(false);
+    m_updateBtn->setVisible(false);
     m_wineBtn->setVisible(false);
     m_wineWarning->setVisible(false);
     m_achievementsSection->setVisible(false);
@@ -368,6 +383,22 @@ void HubWindow::showGameDetail(const GameInfo& info) {
         }
     }
     m_launchBtn->setVisible(installed && currentSupported);
+
+    // Update button — hidden until the async check resolves
+    m_updateBtn->setVisible(false);
+    m_pendingUpdateUrl.clear();
+    if (installed && !info.githubRepo.isEmpty()) {
+        // Read the installed version tag from the setup config
+        QString installedTag;
+        {
+            QFile cfgFile(installDir + "/rexglue-setup.json");
+            if (cfgFile.open(QIODevice::ReadOnly)) {
+                auto doc = QJsonDocument::fromJson(cfgFile.readAll());
+                installedTag = doc.object()["installed_version"].toString();
+            }
+        }
+        m_updateChecker.check(info.githubRepo, installedTag);
+    }
 
     // Wine/Proton: show for Windows-only games on Linux
     bool isLinux = (currentPlatformName() == "Linux");
@@ -760,4 +791,20 @@ QString HubWindow::findWineBinary() const {
         return winePath;
 
     return {};
+}
+
+void HubWindow::onUpdateClicked() {
+    if (!m_pendingUpdateUrl.isEmpty())
+        QDesktopServices::openUrl(QUrl(m_pendingUpdateUrl));
+}
+
+void HubWindow::onUpdateAvailable(const QString& latestTag, const QString& releaseUrl) {
+    m_pendingUpdateUrl = releaseUrl;
+    m_updateBtn->setText(QString("↑ Update (%1)").arg(latestTag));
+    m_updateBtn->setVisible(true);
+}
+
+void HubWindow::onUpdateUpToDate() {
+    m_updateBtn->setVisible(false);
+    m_pendingUpdateUrl.clear();
 }

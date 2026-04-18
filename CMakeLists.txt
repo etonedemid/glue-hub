@@ -22,6 +22,8 @@ add_executable(rexglue-hub WIN32
     src/repomanager.h
     src/downloadmanager.cpp
     src/downloadmanager.h
+    src/updatechecker.cpp
+    src/updatechecker.h
     src/gamerprofile.cpp
     src/gamerprofile.h
     src/profiledialog.cpp

@@ -113,6 +113,7 @@ SetupDialog::SetupDialog(const GameInfo& info, QWidget* parent)
     connect(&m_downloader, &DownloadManager::progress, this, &SetupDialog::onDownloadProgress);
     connect(&m_downloader, &DownloadManager::finished, this, &SetupDialog::onDownloadFinished);
     connect(&m_downloader, &DownloadManager::errorOccurred, this, &SetupDialog::onDownloadError);
+    connect(&m_downloader, &DownloadManager::releaseTagFetched, this, &SetupDialog::onReleaseTagFetched);
 }
 
 void SetupDialog::onBrowseIso() {
@@ -254,6 +255,8 @@ void SetupDialog::extractAndSetup(const QString& archivePath) {
             {
                 QJsonObject cfg;
                 cfg["assets_path"] = m_assetsPath->text();
+                if (!m_installedTag.isEmpty())
+                    cfg["installed_version"] = m_installedTag;
                 QFile cfgFile(installDir + "/rexglue-setup.json");
                 if (cfgFile.open(QIODevice::WriteOnly))
                     cfgFile.write(QJsonDocument(cfg).toJson());
@@ -279,6 +282,8 @@ void SetupDialog::extractAndSetup(const QString& archivePath) {
             {
                 QJsonObject cfg;
                 cfg["assets_path"] = m_assetsPath->text();
+                if (!m_installedTag.isEmpty())
+                    cfg["installed_version"] = m_installedTag;
                 QFile cfgFile(installDir + "/rexglue-setup.json");
                 if (cfgFile.open(QIODevice::WriteOnly))
                     cfgFile.write(QJsonDocument(cfg).toJson());
@@ -299,6 +304,8 @@ void SetupDialog::extractAndSetup(const QString& archivePath) {
         {
             QJsonObject cfg;
             cfg["assets_path"] = m_assetsPath->text();
+            if (!m_installedTag.isEmpty())
+                cfg["installed_version"] = m_installedTag;
             QFile cfgFile(installDir + "/rexglue-setup.json");
             if (cfgFile.open(QIODevice::WriteOnly))
                 cfgFile.write(QJsonDocument(cfg).toJson());
@@ -313,6 +320,8 @@ void SetupDialog::extractAndSetup(const QString& archivePath) {
         {
             QJsonObject cfg;
             cfg["assets_path"] = m_assetsPath->text();
+            if (!m_installedTag.isEmpty())
+                cfg["installed_version"] = m_installedTag;
             QFile cfgFile(installDir + "/rexglue-setup.json");
             if (cfgFile.open(QIODevice::WriteOnly))
                 cfgFile.write(QJsonDocument(cfg).toJson());
@@ -324,10 +333,16 @@ void SetupDialog::extractAndSetup(const QString& archivePath) {
         {
             QJsonObject cfg;
             cfg["assets_path"] = m_assetsPath->text();
+            if (!m_installedTag.isEmpty())
+                cfg["installed_version"] = m_installedTag;
             QFile cfgFile(installDir + "/rexglue-setup.json");
             if (cfgFile.open(QIODevice::WriteOnly))
                 cfgFile.write(QJsonDocument(cfg).toJson());
         }
         accept();
     }
+}
+
+void SetupDialog::onReleaseTagFetched(const QString& tag) {
+    m_installedTag = tag;
 }

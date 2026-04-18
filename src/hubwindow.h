@@ -9,6 +9,7 @@
 #include <QVBoxLayout>
 
 #include "repomanager.h"
+#include "updatechecker.h"
 #include "gameinfo.h"
 
 class HubWindow : public QMainWindow {
@@ -25,6 +26,9 @@ private slots:
     void onLaunchWithWineClicked();
     void onThemeChanged(const QString& theme);
     void onEditProfile();
+    void onUpdateClicked();
+    void onUpdateAvailable(const QString& latestTag, const QString& releaseUrl);
+    void onUpdateUpToDate();
 
 private:
     void buildUi();
@@ -38,6 +42,7 @@ private:
     QString findWineBinary() const;
 
     RepoManager m_repo;
+    UpdateChecker m_updateChecker;
 
     // Sidebar
     QListWidget* m_gameList;
@@ -59,9 +64,13 @@ private:
     QPushButton* m_setupBtn;
     QPushButton* m_launchBtn;
     QPushButton* m_wineBtn;
+    QPushButton* m_updateBtn;
     QLabel* m_wineWarning;
     QLabel* m_statusLabel;
     QLabel* m_emptyLabel;
+
+    // Update state for currently displayed game
+    QString m_pendingUpdateUrl;
 
     // Achievements
     QWidget* m_achievementsSection;

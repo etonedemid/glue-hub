@@ -35,6 +35,11 @@ void DownloadManager::downloadRelease(const QString& repoUrl, const QString& ass
         auto doc = QJsonDocument::fromJson(reply->readAll());
         auto assets = doc.object()["assets"].toArray();
 
+        // Surface the release tag so callers can persist the installed version
+        QString tagName = doc.object()["tag_name"].toString();
+        if (!tagName.isEmpty())
+            emit releaseTagFetched(tagName);
+
         QUrl downloadUrl;
         for (const auto& asset : assets) {
             auto obj = asset.toObject();

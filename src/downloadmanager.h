@@ -16,6 +16,7 @@ public:
 signals:
     void progress(qint64 received, qint64 total);
     void finished(const QString& filePath);
+    void releaseTagFetched(const QString& tag);
     void errorOccurred(const QString& msg);
 
 private:

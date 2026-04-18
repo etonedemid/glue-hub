@@ -21,11 +21,13 @@ private slots:
     void onDownloadProgress(qint64 received, qint64 total);
     void onDownloadFinished(const QString& filePath);
     void onDownloadError(const QString& msg);
+    void onReleaseTagFetched(const QString& tag);
 
 private:
     void extractAndSetup(const QString& archivePath);
 
     GameInfo m_info;
+    QString m_installedTag;  // populated from DownloadManager::releaseTagFetched
     QLineEdit* m_isoPath;
     QLineEdit* m_assetsPath;
     QLineEdit* m_installPath;
