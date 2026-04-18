@@ -9,7 +9,7 @@
 
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
-    app.setApplicationName("ReXGlue Hub");
+    app.setApplicationName("Glue Hub");
     app.setOrganizationName("etonedemid");
 
     // Load theme (loads saved preference, defaults to bundled QSS)
