@@ -220,10 +220,13 @@ bool GamerProfileHub::save() const {
 }
 
 bool GamerProfileHub::createProfile(const QString& gamertag, const QString& gamerpicPath) {
-    // Generate XUID with 0xB13E prefix
-    quint64 rand = QRandomGenerator::global()->generate64() & 0x0000FFFFFFFFFFFFULL;
-    m_profile.xuid = 0xB13E000000000000ULL | rand;
-    m_activeXuid = m_profile.xuid;
+    // Reuse active XUID if already set (e.g. the default B13EBABEBABEBABE),
+    // otherwise generate a fresh one with the 0xB13E prefix.
+    if (m_activeXuid == 0) {
+        quint64 rand = QRandomGenerator::global()->generate64() & 0x0000FFFFFFFFFFFFULL;
+        m_activeXuid = 0xB13E000000000000ULL | rand;
+    }
+    m_profile.xuid = m_activeXuid;
 
     QDir().mkpath(profileRoot());
     QDir().mkpath(gamerpicsDir());

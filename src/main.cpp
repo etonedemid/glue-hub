@@ -37,12 +37,16 @@ int main(int argc, char* argv[]) {
 
     if (rememberedXuid == 0) {
         if (profiles.isEmpty()) {
-            // No profiles at all — create first one
-            ProfileDialog dlg;
-            if (dlg.exec() == QDialog::Accepted) {
-                gph.createProfile(dlg.gamertag(), dlg.selectedGamepic());
-            } else {
-                gph.createProfile("Player");
+            // No profiles in index — try loading the default XUID (B13EBABEBABEBABE)
+            // in case the user already has data from a previous install.
+            if (!gph.load()) {
+                // No existing data — create a fresh profile at the default XUID
+                ProfileDialog dlg;
+                if (dlg.exec() == QDialog::Accepted) {
+                    gph.createProfile(dlg.gamertag(), dlg.selectedGamepic());
+                } else {
+                    gph.createProfile("Player");
+                }
             }
         } else if (profiles.size() == 1) {
             // Single profile — auto-select

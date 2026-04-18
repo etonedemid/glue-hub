@@ -86,5 +86,5 @@ public:
 private:
     GamerProfileHub() = default;
     HubGamerProfile m_profile;
-    quint64 m_activeXuid = 0;
+    quint64 m_activeXuid = 0xB13EBABEBABEBABEULL;
 };
