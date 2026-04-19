@@ -141,6 +141,29 @@ QMainWindow {
     background: #4aa400;
 }
 
+#updateBtn {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #5fc4ff,
+                                stop:0.5 #2896e2,
+                                stop:1 #1667b8);
+    color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 30);
+    border-radius: 10px;
+    padding: 12px 32px;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+#updateBtn:hover {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #7ad0ff,
+                                stop:1 #1c79cc);
+}
+
+#updateBtn:pressed {
+    background: #1c79cc;
+}
+
 #wineBtn {
     background: rgba(255, 255, 255, 200);
     color: rgba(0, 0, 0, 180);

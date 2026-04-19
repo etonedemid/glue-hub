@@ -991,11 +991,14 @@ void HubWindow::handleKonamiKey(int key) {
 }
 
 void HubWindow::showAchievementToast(const QString& title, const QString& desc, int gamerscore) {
-    // Xbox 360-style achievement popup: slides up from bottom-right with the iconic sound-like feel
+    // Xbox 360-style achievement popup: frameless top-level window so it's
+    // never clipped by the parent and always paints its own background.
 
-    auto* toast = new QWidget(this);
+    auto* toast = new QWidget(nullptr,
+        Qt::Tool | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
     toast->setObjectName("achievementToast");
     toast->setAttribute(Qt::WA_DeleteOnClose);
+    toast->setAttribute(Qt::WA_TranslucentBackground);
     toast->setFixedSize(360, 80);
 
     auto* layout = new QHBoxLayout(toast);
@@ -1052,10 +1055,11 @@ void HubWindow::showAchievementToast(const QString& title, const QString& desc, 
         "}"
     );
 
-    // Position: bottom-right, start off-screen
-    int startY = height();
-    int endY = height() - 100;
-    int xPos = width() - 380;
+    // Position: bottom-right of our window, start off-screen, using screen coords
+    QPoint winBottomRight = mapToGlobal(QPoint(width(), height()));
+    int startY = winBottomRight.y();
+    int endY   = winBottomRight.y() - 100;
+    int xPos   = winBottomRight.x() - 380;
     toast->move(xPos, startY);
     toast->show();
     toast->raise();

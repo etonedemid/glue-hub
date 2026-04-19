@@ -116,6 +116,18 @@ QMainWindow {
 
 #launchBtn:hover { background-color: #2e7d32; }
 
+#updateBtn {
+    background-color: #1f78d1;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 32px;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+#updateBtn:hover { background-color: #2b8ae6; }
+
 #wineBtn {
     background-color: #e8e8f0;
     color: #333344;
