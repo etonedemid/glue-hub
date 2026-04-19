@@ -30,8 +30,9 @@ private:
     void loadGamesFromDir(const QString& dir);
 
     QNetworkAccessManager m_nam;
-    QString m_repoUrl;   // kept for compatibility (unused now)
+    QString m_repoUrl;
     QString m_cacheDir;
-    QString m_apiBase;   // e.g. "https://api.github.com/repos/owner/repo/contents"
+    QString m_apiBase;   // "https://api.github.com/repos/owner/repo/contents"
+    QString m_rawBase;   // "https://raw.githubusercontent.com/owner/repo/main"
     QList<GameInfo> m_games;
 };

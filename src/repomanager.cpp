@@ -8,19 +8,22 @@
 #include <QJsonArray>
 #include <QJsonObject>
 
-// Convert a GitHub repo URL to the GitHub Contents API base.
-// Supports both "https://github.com/owner/repo.git" and "https://github.com/owner/repo"
-static QString apiBaseFromUrl(const QString& repoUrl)
+// Convert a GitHub repo URL to the GitHub Contents API base and raw CDN base.
+static void parseGitHubUrl(const QString& repoUrl, QString& apiBase, QString& rawBase)
 {
     QString s = repoUrl;
     if (s.endsWith(".git"))
         s.chop(4);
     if (s.contains("github.com")) {
         QStringList parts = s.split("github.com/");
-        if (parts.size() == 2)
-            return "https://api.github.com/repos/" + parts[1] + "/contents";
+        if (parts.size() == 2) {
+            apiBase = "https://api.github.com/repos/" + parts[1] + "/contents";
+            rawBase = "https://raw.githubusercontent.com/" + parts[1] + "/main";
+            return;
+        }
     }
-    return {};
+    apiBase.clear();
+    rawBase.clear();
 }
 
 RepoManager::RepoManager(QObject* parent)
@@ -28,13 +31,13 @@ RepoManager::RepoManager(QObject* parent)
 {
     m_repoUrl  = "https://github.com/etonedemid/rexglue-hub-repo.git";
     m_cacheDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/hub-repo";
-    m_apiBase  = apiBaseFromUrl(m_repoUrl);
+    parseGitHubUrl(m_repoUrl, m_apiBase, m_rawBase);
 }
 
 void RepoManager::setRepoUrl(const QString& url)
 {
     m_repoUrl = url;
-    m_apiBase = apiBaseFromUrl(url);
+    parseGitHubUrl(url, m_apiBase, m_rawBase);
 }
 
 void RepoManager::setCacheDir(const QString& dir) { m_cacheDir = dir; }
@@ -45,8 +48,8 @@ void RepoManager::refresh()
 {
     emit refreshStarted();
 
-    if (m_apiBase.isEmpty()) {
-        // Non-GitHub URL: fall back to whatever is cached on disk.
+    if (m_apiBase.isEmpty() || m_rawBase.isEmpty()) {
+        // Non-GitHub URL: serve from whatever is cached on disk.
         loadGamesFromDir(m_cacheDir);
         emit statusMessage(QString("Found %1 games (cached)").arg(m_games.size()));
         emit refreshFinished();
@@ -75,18 +78,22 @@ void RepoManager::fetchDirListing()
         reply->deleteLater();
 
         if (reply->error() != QNetworkReply::NoError) {
-            emit statusMessage("Network error, using cached data");
+            emit errorOccurred(reply->errorString());
+            emit statusMessage("Network error — using cached data");
             loadGamesFromDir(m_cacheDir);
-            emit statusMessage(QString("Found %1 games").arg(m_games.size()));
+            emit statusMessage(QString("Found %1 games (cached)").arg(m_games.size()));
             emit refreshFinished();
             return;
         }
 
-        auto doc = QJsonDocument::fromJson(reply->readAll());
-        if (!doc.isArray()) {
-            emit statusMessage("Unexpected catalog response, using cached data");
+        int httpStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        QByteArray body = reply->readAll();
+        auto doc = QJsonDocument::fromJson(body);
+        if (httpStatus != 200 || !doc.isArray()) {
+            emit errorOccurred(QString("Unexpected catalog response (HTTP %1)").arg(httpStatus));
+            emit statusMessage("Catalog error — using cached data");
             loadGamesFromDir(m_cacheDir);
-            emit statusMessage(QString("Found %1 games").arg(m_games.size()));
+            emit statusMessage(QString("Found %1 games (cached)").arg(m_games.size()));
             emit refreshFinished();
             return;
         }
@@ -121,11 +128,11 @@ void RepoManager::fetchGameInfo(const QStringList& entries, int index)
     }
 
     const QString entry = entries[index];
-    QUrl infoUrl(m_apiBase + "/" + entry + "/info.json");
+    // Use raw.githubusercontent.com — returns the file bytes directly,
+    // no Accept header magic, no base64 wrapping.
+    QUrl infoUrl(m_rawBase + "/" + entry + "/info.json");
     QNetworkRequest req(infoUrl);
-    req.setRawHeader("Accept", "application/vnd.github.raw+json");
     req.setRawHeader("User-Agent", "glue-hub");
-    req.setRawHeader("X-GitHub-Api-Version", "2022-11-28");
     req.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
                      QNetworkRequest::NoLessSafeRedirectPolicy);
 
@@ -133,7 +140,9 @@ void RepoManager::fetchGameInfo(const QStringList& entries, int index)
     connect(reply, &QNetworkReply::finished, this, [this, reply, entries, index, entry]() {
         reply->deleteLater();
 
-        if (reply->error() == QNetworkReply::NoError) {
+        if (reply->error() != QNetworkReply::NoError) {
+            emit statusMessage(QString("Failed to fetch %1: %2").arg(entry, reply->errorString()));
+        } else {
             QByteArray data = reply->readAll();
 
             // Cache to disk for offline fallback.
